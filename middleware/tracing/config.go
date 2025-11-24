@@ -53,3 +53,12 @@ func Insecure(insecure bool) Option {
 		opts.insecure = insecure
 	}
 }
+
+func ParseEndpointType(endpointType string) _EndpointType {
+	switch endpointType {
+	case "http":
+		return EndpointType_HTTP
+	default:
+		return EndpointType_GRPC
+	}
+}
