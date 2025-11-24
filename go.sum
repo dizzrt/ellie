@@ -31,8 +31,6 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dizzrt/ellie/contrib/registry/consul v0.0.0-20251111182503-e174ce255678 h1:H2OitxaW67oeDhAaJ3LYBVvOQ8myCCrvtsKATMwMN2o=
-github.com/dizzrt/ellie/contrib/registry/consul v0.0.0-20251111182503-e174ce255678/go.mod h1:tkZ6Xcb8RocdZiRNnbpG3M+qVBJb2vdBoUvIO9s+ZV8=
 github.com/dizzrt/filerotator v0.2.1 h1:z+iZNd/b7RuN34ISjCOJVTCVyFMswYAr0oMurzK2xv8=
 github.com/dizzrt/filerotator v0.2.1/go.mod h1:ZJbjn0WXXvDYuZxZd63qzqlDuy3D7jNeHsaxpgkiTuU=
 github.com/envoyproxy/go-control-plane v0.13.4 h1:zEqyPVyku6IvWCFwux4x9RxkLOMUL+1vC9xUFv5l2/M=

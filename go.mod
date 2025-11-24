@@ -2,9 +2,7 @@ module github.com/dizzrt/ellie
 
 go 1.25.3
 
-replace (
-	github.com/dizzrt/ellie/contrib/registry/consul => ./contrib/registry/consul
-)
+replace github.com/dizzrt/ellie/contrib/registry/consul => ./contrib/registry/consul
 
 require (
 	github.com/dizzrt/ellie/contrib/registry/consul v0.0.0-20251111182503-e174ce255678

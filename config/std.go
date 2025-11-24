@@ -119,7 +119,7 @@ func (c *stdViperConfig) GetConfigPath(env string) (string, error) {
 
 	envSeparator := ""
 	if env != "" {
-		envSeparator = "_"
+		envSeparator = "."
 	}
 
 	conf := fmt.Sprintf("%s/%s%s%s%s", c.configFileDir, c.configFileName, envSeparator, env, c.configFileSuffix)
