@@ -75,12 +75,14 @@ func (c *stdViperConfig) Load() error {
 
 	// load env config
 	env := c.v.GetString("ENV")
-	if conf, err = c.GetConfigPath(env); err != nil {
-		return err
-	}
+	if env != "" {
+		if conf, err = c.GetConfigPath(env); err != nil {
+			return err
+		}
 
-	if err = c.mergeInConfig(conf, env); err != nil {
-		return err
+		if err = c.mergeInConfig(conf, env); err != nil {
+			return err
+		}
 	}
 
 	// load local config
@@ -119,7 +121,7 @@ func (c *stdViperConfig) GetConfigPath(env string) (string, error) {
 
 	envSeparator := ""
 	if env != "" {
-		envSeparator = "_"
+		envSeparator = "."
 	}
 
 	conf := fmt.Sprintf("%s/%s%s%s%s", c.configFileDir, c.configFileName, envSeparator, env, c.configFileSuffix)

@@ -12,6 +12,7 @@ import (
 	"github.com/dizzrt/ellie/internal/mock/ping"
 	"github.com/dizzrt/ellie/log"
 	"github.com/dizzrt/ellie/middleware/tracing"
+	trace_sdk "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc"
 )
 
@@ -192,7 +193,10 @@ func TestPingWithTracing(t *testing.T) {
 	defer func() {
 		ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
-		tp.Shutdown(ctx)
+
+		if sdkTp, ok := tp.(*trace_sdk.TracerProvider); ok {
+			sdkTp.Shutdown(ctx)
+		}
 	}()
 
 	// start server

@@ -9,6 +9,7 @@ import (
 	"github.com/dizzrt/ellie/log"
 	"github.com/dizzrt/ellie/registry"
 	"github.com/dizzrt/ellie/transport"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type Option func(opts *options)
@@ -24,6 +25,7 @@ type options struct {
 	sigs []os.Signal
 
 	logger           log.LogWriter
+	tracer           trace.TracerProvider
 	registrar        registry.Registrar
 	registrarTimeout time.Duration
 	stopTimeout      time.Duration
@@ -81,6 +83,12 @@ func Signal(sigs ...os.Signal) Option {
 func Logger(logger log.LogWriter) Option {
 	return func(opts *options) {
 		opts.logger = logger
+	}
+}
+
+func Tracer(tracer trace.TracerProvider) Option {
+	return func(opts *options) {
+		opts.tracer = tracer
 	}
 }
 

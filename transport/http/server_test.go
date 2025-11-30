@@ -16,6 +16,7 @@ import (
 	"github.com/dizzrt/ellie/transport/http"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/render"
+	trace_sdk "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -115,7 +116,10 @@ func TestHTTPServerWithTracing(t *testing.T) {
 	defer func() {
 		ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 		defer cancel()
-		tp.Shutdown(ctx)
+
+		if sdkTp, ok := tp.(*trace_sdk.TracerProvider); ok {
+			sdkTp.Shutdown(ctx)
+		}
 	}()
 
 	var opts = []http.ServerOption{

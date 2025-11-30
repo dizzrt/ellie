@@ -11,16 +11,17 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"go.opentelemetry.io/otel/sdk/trace"
+	trace_sdk "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
+	"go.opentelemetry.io/otel/trace"
 )
 
-func InitializeWithCustomTracer(tp *trace.TracerProvider, propagator propagation.TextMapPropagator) {
+func InitializeWithCustomTracer(tp trace.TracerProvider, propagator propagation.TextMapPropagator) {
 	otel.SetTracerProvider(tp)
 	otel.SetTextMapPropagator(propagator)
 }
 
-func Initialize(ctx context.Context, opts ...Option) (*trace.TracerProvider, error) {
+func Initialize(ctx context.Context, opts ...Option) (trace.TracerProvider, error) {
 	conf := &config{
 		endpointType: EndpointType_GRPC,
 		insecure:     true,
@@ -67,13 +68,13 @@ func Initialize(ctx context.Context, opts ...Option) (*trace.TracerProvider, err
 	}
 
 	// create sampler
-	sampler := trace.AlwaysSample()
+	sampler := trace_sdk.AlwaysSample()
 
 	// create tracer provider
-	tp := trace.NewTracerProvider(
-		trace.WithBatcher(exporter),
-		trace.WithResource(res),
-		trace.WithSampler(sampler),
+	tp := trace_sdk.NewTracerProvider(
+		trace_sdk.WithBatcher(exporter),
+		trace_sdk.WithResource(res),
+		trace_sdk.WithSampler(sampler),
 	)
 
 	propagator := propagation.NewCompositeTextMapPropagator(
