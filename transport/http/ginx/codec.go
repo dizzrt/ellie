@@ -37,6 +37,7 @@ func DecodeRequest(ctx *gin.Context, req any) error {
 	config := &mapstructure.DecoderConfig{
 		WeaklyTypedInput: true,
 		Result:           req,
+		TagName:          "json", // protobuf use "json" tag in default
 	}
 
 	decoder, err := mapstructure.NewDecoder(config)
@@ -63,7 +64,7 @@ func parseBody(ctx *gin.Context, inMap map[string]any) error {
 		return err
 	}
 
-	if err := ctx.Request.Body.Close(); err != nil {
+	if err = ctx.Request.Body.Close(); err != nil {
 		return err
 	}
 
