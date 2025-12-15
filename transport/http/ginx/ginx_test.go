@@ -1,35 +1,34 @@
 package ginx
 
 import (
-	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
 )
 
 type UserRequest struct {
-	ID    int
-	Name  string
-	Email string
-	Age   int
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Age   int    `json:"age"`
 }
 
 func TestDecode(t *testing.T) {
-	r := gin.Default()
-	r.POST("/user/:id", func(ctx *gin.Context) {
-		var req UserRequest
-		if err := DecodeRequest(ctx, &req); err != nil {
-			t.Errorf("DecodeRequest error: %v", err)
-			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+	gin.SetMode(gin.TestMode)
+	req, err := http.NewRequest("POST", "/user/123", nil)
+	assert.NoError(t, err)
 
-		fmt.Printf("Decoded Request: %+v\n", req)
-		ctx.JSON(http.StatusOK, gin.H{
-			"user": req,
-		})
-	})
+	w := httptest.NewRecorder()
+	c, _ := gin.CreateTestContext(w)
+	c.Request = req
+	c.Params = gin.Params{{Key: "id", Value: "123"}}
 
-	r.Run()
+	var userReq UserRequest
+	err = DecodeRequest(c, &userReq)
+	assert.NoError(t, err)
+
+	assert.Equal(t, 123, userReq.ID)
 }
