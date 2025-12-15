@@ -7,6 +7,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
@@ -75,10 +76,22 @@ func Unmarshal(err error) error {
 
 	var chain *ErrorChain
 	for _, detail := range st.Details() {
-		if c, ok := detail.(*ErrorChain); ok {
-			chain = c
-			break
+		anyDetail, ok := detail.(*anypb.Any)
+		if !ok {
+			continue
 		}
+
+		tmpChain := &ErrorChain{}
+		if ee := anypb.UnmarshalTo(anyDetail, tmpChain, proto.UnmarshalOptions{}); ee != nil {
+			continue
+		}
+
+		// if c, ok := detail.(*ErrorChain); ok {
+		// 	chain = c
+		// 	break
+		// }
+		chain = tmpChain
+		break
 	}
 
 	if chain == nil || chain.Root == nil {
