@@ -1,12 +1,16 @@
 package errors
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/status"
 )
+
+var _ error = (*Error)(nil)
+var _ Chainable = (*Error)(nil)
 
 const (
 	UnknownCode   = 500
@@ -84,6 +88,18 @@ func (e *Error) WithMetadata(metadata map[string]string) *Error {
 func (e *Error) GRPCStatus() *status.Status {
 	// TODO
 	return nil
+}
+
+func (e *Error) Type() string {
+	return CHAINABLE_ERROR_TYPE_ELLIE
+}
+
+func (e *Error) Marshal() ([]byte, error) {
+	return json.Marshal(e)
+}
+
+func (e *Error) Wrap(err error) error {
+	return e.WithCause(err)
 }
 
 func Clone(err *Error) *Error {

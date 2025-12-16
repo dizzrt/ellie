@@ -1,15 +1,39 @@
 package errors
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"maps"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 )
+
+const CHAINABLE_ERROR_TYPE_ELLIE = "chainable_error_type_ellie"
+const CHAINABLE_ERROR_TYPE_GOLANG = "chainable_error_type_golang"
+
+var chainableErrorTypeMap = map[string]func(string, []byte) error{
+	CHAINABLE_ERROR_TYPE_ELLIE:  chainableUnmarshal,
+	CHAINABLE_ERROR_TYPE_GOLANG: nil,
+}
+
+type Chainable interface {
+	error
+	Type() string
+	Marshal() ([]byte, error)
+	Wrap(error) error
+}
+
+func RegisterChainableErrorType(ty string, fn func(string, []byte) error) error {
+	if _, ok := chainableErrorTypeMap[ty]; ok {
+		return fmt.Errorf("chainable error type '%s' already registered", ty)
+	}
+
+	chainableErrorTypeMap[ty] = fn
+	return nil
+}
 
 func Marshal(code codes.Code, err error) error {
 	if err == nil {
@@ -42,18 +66,19 @@ func recursiveMarshal(err error) *ErrorChainNode {
 
 	node := &ErrorChainNode{
 		Message: err.Error(),
-		Type:    ErrorChainNodeType_GOLANG_ERROR,
+		Type:    CHAINABLE_ERROR_TYPE_GOLANG,
 	}
 
-	var ee *Error
-	if As(err, &ee) {
-		node.Type = ErrorChainNodeType_ELLIE_ERROR
-		node.Code = ee.Code
-		node.Reason = ee.Reason
-		node.BizMessage = ee.Message
-
-		node.Metadata = make(map[string]string, len(ee.Metadata))
-		maps.Copy(node.Metadata, ee.Metadata)
+	ce, ok := err.(Chainable)
+	if ok {
+		node.Type = ce.Type()
+		data, ee := ce.Marshal()
+		if ee != nil {
+			ee = fmt.Errorf("failed to marshal chainable error: %v, raw error: %v", ee, err)
+			node.Message = ee.Error()
+		} else {
+			node.Data = data
+		}
 	}
 
 	wrappedErr := errors.Unwrap(err)
@@ -86,10 +111,6 @@ func Unmarshal(err error) error {
 			continue
 		}
 
-		// if c, ok := detail.(*ErrorChain); ok {
-		// 	chain = c
-		// 	break
-		// }
 		chain = tmpChain
 		break
 	}
@@ -107,24 +128,33 @@ func recursiveUnmarshal(node *ErrorChainNode) error {
 	}
 
 	var err error
-	if node.Type == ErrorChainNodeType_ELLIE_ERROR {
-		ee := New(int(node.Code), node.Reason, node.BizMessage)
+	ty := node.GetType()
+	if ty != "" {
+		if fn, ok := chainableErrorTypeMap[ty]; ok && fn != nil {
+			err = fn(node.GetMessage(), node.GetData())
+		}
+	}
 
-		ee.Metadata = make(map[string]string, len(node.Metadata))
-		maps.Copy(ee.Metadata, node.Metadata)
-
-		err = ee
-	} else {
-		err = errors.New(node.Message)
+	if err == nil {
+		err = errors.New(node.GetMessage())
 	}
 
 	wrappedErr := recursiveUnmarshal(node.Wrapped)
 	if wrappedErr != nil {
-		if ee, ok := err.(*Error); ok {
-			err = ee.WithCause(wrappedErr)
+		if ce, ok := err.(Chainable); ok {
+			err = ce.Wrap(wrappedErr)
 		} else {
 			err = fmt.Errorf("%w", wrappedErr)
 		}
+	}
+
+	return err
+}
+
+func chainableUnmarshal(_ string, data []byte) error {
+	err := &Error{}
+	if ee := json.Unmarshal(data, &err); ee != nil {
+		return fmt.Errorf("failed to unmarshal chainable error: %w, data: %s", ee, string(data))
 	}
 
 	return err

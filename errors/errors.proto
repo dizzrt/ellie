@@ -21,22 +21,11 @@ extend google.protobuf.EnumValueOptions {
   int32 code = 51002;
 }
 
-enum ErrorChainNodeType {
-  UNKNOWN = 0;
-  ELLIE_ERROR = 1;
-  GOLANG_ERROR = 2;
-}
-
 message ErrorChainNode {
-  string message = 1; // err.Error()
-  ErrorChainNodeType type = 2;
-  ErrorChainNode wrapped = 3; // cause/Unwrap
-
-  // for ELLIE_ERROR
-  int32 code = 4;                   // Status.Code
-  string reason = 5;                // Status.Reason
-  string biz_message = 6;           // Status.Message
-  map<string, string> metadata = 7; // Status.Metadata
+  string type = 1;
+  string message = 2; 
+  bytes data = 3;
+  ErrorChainNode wrapped = 4; 
 }
 
 message ErrorChain {

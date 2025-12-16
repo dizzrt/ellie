@@ -22,55 +22,6 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ErrorChainNodeType int32
-
-const (
-	ErrorChainNodeType_UNKNOWN      ErrorChainNodeType = 0
-	ErrorChainNodeType_ELLIE_ERROR  ErrorChainNodeType = 1
-	ErrorChainNodeType_GOLANG_ERROR ErrorChainNodeType = 2
-)
-
-// Enum value maps for ErrorChainNodeType.
-var (
-	ErrorChainNodeType_name = map[int32]string{
-		0: "UNKNOWN",
-		1: "ELLIE_ERROR",
-		2: "GOLANG_ERROR",
-	}
-	ErrorChainNodeType_value = map[string]int32{
-		"UNKNOWN":      0,
-		"ELLIE_ERROR":  1,
-		"GOLANG_ERROR": 2,
-	}
-)
-
-func (x ErrorChainNodeType) Enum() *ErrorChainNodeType {
-	p := new(ErrorChainNodeType)
-	*p = x
-	return p
-}
-
-func (x ErrorChainNodeType) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (ErrorChainNodeType) Descriptor() protoreflect.EnumDescriptor {
-	return file_errors_proto_enumTypes[0].Descriptor()
-}
-
-func (ErrorChainNodeType) Type() protoreflect.EnumType {
-	return &file_errors_proto_enumTypes[0]
-}
-
-func (x ErrorChainNodeType) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use ErrorChainNodeType.Descriptor instead.
-func (ErrorChainNodeType) EnumDescriptor() ([]byte, []int) {
-	return file_errors_proto_rawDescGZIP(), []int{0}
-}
-
 type Status struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
@@ -140,15 +91,11 @@ func (x *Status) GetMetadata() map[string]string {
 }
 
 type ErrorChainNode struct {
-	state   protoimpl.MessageState `protogen:"open.v1"`
-	Message string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"` // err.Error()
-	Type    ErrorChainNodeType     `protobuf:"varint,2,opt,name=type,proto3,enum=errors.ErrorChainNodeType" json:"type,omitempty"`
-	Wrapped *ErrorChainNode        `protobuf:"bytes,3,opt,name=wrapped,proto3" json:"wrapped,omitempty"` // cause/Unwrap
-	// for ELLIE_ERROR
-	Code          int32             `protobuf:"varint,4,opt,name=code,proto3" json:"code,omitempty"`                                                                                  // Status.Code
-	Reason        string            `protobuf:"bytes,5,opt,name=reason,proto3" json:"reason,omitempty"`                                                                               // Status.Reason
-	BizMessage    string            `protobuf:"bytes,6,opt,name=biz_message,json=bizMessage,proto3" json:"biz_message,omitempty"`                                                     // Status.Message
-	Metadata      map[string]string `protobuf:"bytes,7,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // Status.Metadata
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Data          []byte                 `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
+	Wrapped       *ErrorChainNode        `protobuf:"bytes,4,opt,name=wrapped,proto3" json:"wrapped,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -183,6 +130,13 @@ func (*ErrorChainNode) Descriptor() ([]byte, []int) {
 	return file_errors_proto_rawDescGZIP(), []int{1}
 }
 
+func (x *ErrorChainNode) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
 func (x *ErrorChainNode) GetMessage() string {
 	if x != nil {
 		return x.Message
@@ -190,44 +144,16 @@ func (x *ErrorChainNode) GetMessage() string {
 	return ""
 }
 
-func (x *ErrorChainNode) GetType() ErrorChainNodeType {
+func (x *ErrorChainNode) GetData() []byte {
 	if x != nil {
-		return x.Type
+		return x.Data
 	}
-	return ErrorChainNodeType_UNKNOWN
+	return nil
 }
 
 func (x *ErrorChainNode) GetWrapped() *ErrorChainNode {
 	if x != nil {
 		return x.Wrapped
-	}
-	return nil
-}
-
-func (x *ErrorChainNode) GetCode() int32 {
-	if x != nil {
-		return x.Code
-	}
-	return 0
-}
-
-func (x *ErrorChainNode) GetReason() string {
-	if x != nil {
-		return x.Reason
-	}
-	return ""
-}
-
-func (x *ErrorChainNode) GetBizMessage() string {
-	if x != nil {
-		return x.BizMessage
-	}
-	return ""
-}
-
-func (x *ErrorChainNode) GetMetadata() map[string]string {
-	if x != nil {
-		return x.Metadata
 	}
 	return nil
 }
@@ -319,26 +245,15 @@ const file_errors_proto_rawDesc = "" +
 	"\bmetadata\x18\x04 \x03(\v2\x1c.errors.Status.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xd8\x02\n" +
-	"\x0eErrorChainNode\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\x12.\n" +
-	"\x04type\x18\x02 \x01(\x0e2\x1a.errors.ErrorChainNodeTypeR\x04type\x120\n" +
-	"\awrapped\x18\x03 \x01(\v2\x16.errors.ErrorChainNodeR\awrapped\x12\x12\n" +
-	"\x04code\x18\x04 \x01(\x05R\x04code\x12\x16\n" +
-	"\x06reason\x18\x05 \x01(\tR\x06reason\x12\x1f\n" +
-	"\vbiz_message\x18\x06 \x01(\tR\n" +
-	"bizMessage\x12@\n" +
-	"\bmetadata\x18\a \x03(\v2$.errors.ErrorChainNode.MetadataEntryR\bmetadata\x1a;\n" +
-	"\rMetadataEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"8\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x84\x01\n" +
+	"\x0eErrorChainNode\x12\x12\n" +
+	"\x04type\x18\x01 \x01(\tR\x04type\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x12\n" +
+	"\x04data\x18\x03 \x01(\fR\x04data\x120\n" +
+	"\awrapped\x18\x04 \x01(\v2\x16.errors.ErrorChainNodeR\awrapped\"8\n" +
 	"\n" +
 	"ErrorChain\x12*\n" +
-	"\x04root\x18\x01 \x01(\v2\x16.errors.ErrorChainNodeR\x04root*D\n" +
-	"\x12ErrorChainNodeType\x12\v\n" +
-	"\aUNKNOWN\x10\x00\x12\x0f\n" +
-	"\vELLIE_ERROR\x10\x01\x12\x10\n" +
-	"\fGOLANG_ERROR\x10\x02:A\n" +
+	"\x04root\x18\x01 \x01(\v2\x16.errors.ErrorChainNodeR\x04root:A\n" +
 	"\fdefault_code\x12\x1c.google.protobuf.EnumOptions\x18\xb9\x8e\x03 \x01(\x05R\vdefaultCode:7\n" +
 	"\x04code\x12!.google.protobuf.EnumValueOptions\x18\xba\x8e\x03 \x01(\x05R\x04codeB'Z%github.com/dizzrt/ellie/errors;errorsb\x06proto3"
 
@@ -354,31 +269,26 @@ func file_errors_proto_rawDescGZIP() []byte {
 	return file_errors_proto_rawDescData
 }
 
-var file_errors_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_errors_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_errors_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_errors_proto_goTypes = []any{
-	(ErrorChainNodeType)(0),               // 0: errors.ErrorChainNodeType
-	(*Status)(nil),                        // 1: errors.Status
-	(*ErrorChainNode)(nil),                // 2: errors.ErrorChainNode
-	(*ErrorChain)(nil),                    // 3: errors.ErrorChain
-	nil,                                   // 4: errors.Status.MetadataEntry
-	nil,                                   // 5: errors.ErrorChainNode.MetadataEntry
-	(*descriptorpb.EnumOptions)(nil),      // 6: google.protobuf.EnumOptions
-	(*descriptorpb.EnumValueOptions)(nil), // 7: google.protobuf.EnumValueOptions
+	(*Status)(nil),                        // 0: errors.Status
+	(*ErrorChainNode)(nil),                // 1: errors.ErrorChainNode
+	(*ErrorChain)(nil),                    // 2: errors.ErrorChain
+	nil,                                   // 3: errors.Status.MetadataEntry
+	(*descriptorpb.EnumOptions)(nil),      // 4: google.protobuf.EnumOptions
+	(*descriptorpb.EnumValueOptions)(nil), // 5: google.protobuf.EnumValueOptions
 }
 var file_errors_proto_depIdxs = []int32{
-	4, // 0: errors.Status.metadata:type_name -> errors.Status.MetadataEntry
-	0, // 1: errors.ErrorChainNode.type:type_name -> errors.ErrorChainNodeType
-	2, // 2: errors.ErrorChainNode.wrapped:type_name -> errors.ErrorChainNode
-	5, // 3: errors.ErrorChainNode.metadata:type_name -> errors.ErrorChainNode.MetadataEntry
-	2, // 4: errors.ErrorChain.root:type_name -> errors.ErrorChainNode
-	6, // 5: errors.default_code:extendee -> google.protobuf.EnumOptions
-	7, // 6: errors.code:extendee -> google.protobuf.EnumValueOptions
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	5, // [5:7] is the sub-list for extension extendee
-	0, // [0:5] is the sub-list for field type_name
+	3, // 0: errors.Status.metadata:type_name -> errors.Status.MetadataEntry
+	1, // 1: errors.ErrorChainNode.wrapped:type_name -> errors.ErrorChainNode
+	1, // 2: errors.ErrorChain.root:type_name -> errors.ErrorChainNode
+	4, // 3: errors.default_code:extendee -> google.protobuf.EnumOptions
+	5, // 4: errors.code:extendee -> google.protobuf.EnumValueOptions
+	5, // [5:5] is the sub-list for method output_type
+	5, // [5:5] is the sub-list for method input_type
+	5, // [5:5] is the sub-list for extension type_name
+	3, // [3:5] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_errors_proto_init() }
@@ -391,14 +301,13 @@ func file_errors_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_errors_proto_rawDesc), len(file_errors_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   5,
+			NumEnums:      0,
+			NumMessages:   4,
 			NumExtensions: 2,
 			NumServices:   0,
 		},
 		GoTypes:           file_errors_proto_goTypes,
 		DependencyIndexes: file_errors_proto_depIdxs,
-		EnumInfos:         file_errors_proto_enumTypes,
 		MessageInfos:      file_errors_proto_msgTypes,
 		ExtensionInfos:    file_errors_proto_extTypes,
 	}.Build()
