@@ -1,7 +1,6 @@
 package errors
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 
@@ -11,19 +10,20 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 )
 
-const CHAINABLE_ERROR_TYPE_ELLIE = "chainable_error_type_ellie"
-const CHAINABLE_ERROR_TYPE_GOLANG = "chainable_error_type_golang"
+const CHAINABLE_ERROR_TYPE_GOLANG = "errorString"
+const CHAINABLE_ERROR_TYPE_STANDARD = _STANDARD_ERROR_TYPE
 
 var chainableErrorTypeMap = map[string]func(string, []byte) error{
-	CHAINABLE_ERROR_TYPE_ELLIE:  chainableUnmarshal,
-	CHAINABLE_ERROR_TYPE_GOLANG: nil,
+	CHAINABLE_ERROR_TYPE_GOLANG:   nil,
+	CHAINABLE_ERROR_TYPE_STANDARD: standardErrorChainableUnmarshal,
 }
 
 type Chainable interface {
 	error
+
 	Type() string
-	Marshal() ([]byte, error)
 	Wrap(error) error
+	Marshal() ([]byte, error)
 }
 
 func RegisterChainableErrorType(ty string, fn func(string, []byte) error) error {
@@ -151,11 +151,19 @@ func recursiveUnmarshal(node *ErrorChainNode) error {
 	return err
 }
 
-func chainableUnmarshal(_ string, data []byte) error {
-	err := &Error{}
-	if ee := json.Unmarshal(data, &err); ee != nil {
-		return fmt.Errorf("failed to unmarshal chainable error: %w, data: %s", ee, string(data))
+func WrpGRPCResponse[T any](data T, err error) (T, error) {
+	if _, ok := status.FromError(err); ok {
+		return data, err
 	}
 
-	return err
+	if se, ok := err.(*StandardError); ok {
+		status := se.Status()
+		return data, Marshal(status, err)
+	}
+
+	return data, err
+}
+
+func UnwrapGRPCResponse[T any](data T, err error) (T, error) {
+	return data, Unmarshal(err)
 }

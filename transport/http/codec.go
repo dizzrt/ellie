@@ -4,10 +4,6 @@ import (
 	"github.com/gin-gonic/gin/render"
 )
 
-type Redirector interface {
-	Redirect() (string, int)
-}
-
 type HTTPResponseEncoder = func(data any, err error, s *Server) (int, render.Render)
 
 func DefaultResponseEncoder(data any, err error, s *Server) (int, render.Render) {

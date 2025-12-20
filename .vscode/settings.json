@@ -1,8 +1,7 @@
 {
-    "protoc": {
-        "options": [
-            "--proto_path=${workspaceFolder}/api/proto",
-            "--proto_path=${workspaceFolder}/third_party",
-        ]
-    }
+  "protobuf.protoc.path": "protoc",
+  "protobuf.protoc.options": [
+    "--proto_path=${workspaceFolder}/**",
+    "--go_out=${workspaceFolder}/gen/go"
+  ]
 }

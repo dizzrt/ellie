@@ -22,30 +22,32 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Status struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
-	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"`
-	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`
-	Metadata      map[string]string      `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+type ErrorStatus struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// grpc codes.Code
+	Status        uint32            `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
+	Code          int32             `protobuf:"varint,2,opt,name=code,proto3" json:"code,omitempty"`
+	Reason        string            `protobuf:"bytes,3,opt,name=reason,proto3" json:"reason,omitempty"`
+	Message       string            `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
+	Metadata      map[string]string `protobuf:"bytes,5,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Status) Reset() {
-	*x = Status{}
+func (x *ErrorStatus) Reset() {
+	*x = ErrorStatus{}
 	mi := &file_errors_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Status) String() string {
+func (x *ErrorStatus) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Status) ProtoMessage() {}
+func (*ErrorStatus) ProtoMessage() {}
 
-func (x *Status) ProtoReflect() protoreflect.Message {
+func (x *ErrorStatus) ProtoReflect() protoreflect.Message {
 	mi := &file_errors_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -57,33 +59,40 @@ func (x *Status) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Status.ProtoReflect.Descriptor instead.
-func (*Status) Descriptor() ([]byte, []int) {
+// Deprecated: Use ErrorStatus.ProtoReflect.Descriptor instead.
+func (*ErrorStatus) Descriptor() ([]byte, []int) {
 	return file_errors_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Status) GetCode() int32 {
+func (x *ErrorStatus) GetStatus() uint32 {
+	if x != nil {
+		return x.Status
+	}
+	return 0
+}
+
+func (x *ErrorStatus) GetCode() int32 {
 	if x != nil {
 		return x.Code
 	}
 	return 0
 }
 
-func (x *Status) GetReason() string {
+func (x *ErrorStatus) GetReason() string {
 	if x != nil {
 		return x.Reason
 	}
 	return ""
 }
 
-func (x *Status) GetMessage() string {
+func (x *ErrorStatus) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-func (x *Status) GetMetadata() map[string]string {
+func (x *ErrorStatus) GetMetadata() map[string]string {
 	if x != nil {
 		return x.Metadata
 	}
@@ -212,11 +221,27 @@ var file_errors_proto_extTypes = []protoimpl.ExtensionInfo{
 		Filename:      "errors.proto",
 	},
 	{
+		ExtendedType:  (*descriptorpb.EnumOptions)(nil),
+		ExtensionType: (*uint32)(nil),
+		Field:         51002,
+		Name:          "errors.default_status",
+		Tag:           "varint,51002,opt,name=default_status",
+		Filename:      "errors.proto",
+	},
+	{
 		ExtendedType:  (*descriptorpb.EnumValueOptions)(nil),
 		ExtensionType: (*int32)(nil),
-		Field:         51002,
+		Field:         52001,
 		Name:          "errors.code",
-		Tag:           "varint,51002,opt,name=code",
+		Tag:           "varint,52001,opt,name=code",
+		Filename:      "errors.proto",
+	},
+	{
+		ExtendedType:  (*descriptorpb.EnumValueOptions)(nil),
+		ExtensionType: (*uint32)(nil),
+		Field:         52002,
+		Name:          "errors.status",
+		Tag:           "varint,52002,opt,name=status",
 		Filename:      "errors.proto",
 	},
 }
@@ -225,24 +250,29 @@ var file_errors_proto_extTypes = []protoimpl.ExtensionInfo{
 var (
 	// optional int32 default_code = 51001;
 	E_DefaultCode = &file_errors_proto_extTypes[0]
+	// optional uint32 default_status = 51002;
+	E_DefaultStatus = &file_errors_proto_extTypes[1]
 )
 
 // Extension fields to descriptorpb.EnumValueOptions.
 var (
-	// optional int32 code = 51002;
-	E_Code = &file_errors_proto_extTypes[1]
+	// optional int32 code = 52001;
+	E_Code = &file_errors_proto_extTypes[2]
+	// optional uint32 status = 52002;
+	E_Status = &file_errors_proto_extTypes[3]
 )
 
 var File_errors_proto protoreflect.FileDescriptor
 
 const file_errors_proto_rawDesc = "" +
 	"\n" +
-	"\ferrors.proto\x12\x06errors\x1a google/protobuf/descriptor.proto\"\xc5\x01\n" +
-	"\x06Status\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x16\n" +
-	"\x06reason\x18\x02 \x01(\tR\x06reason\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage\x128\n" +
-	"\bmetadata\x18\x04 \x03(\v2\x1c.errors.Status.MetadataEntryR\bmetadata\x1a;\n" +
+	"\ferrors.proto\x12\x06errors\x1a google/protobuf/descriptor.proto\"\xe7\x01\n" +
+	"\vErrorStatus\x12\x16\n" +
+	"\x06status\x18\x01 \x01(\rR\x06status\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\x05R\x04code\x12\x16\n" +
+	"\x06reason\x18\x03 \x01(\tR\x06reason\x12\x18\n" +
+	"\amessage\x18\x04 \x01(\tR\amessage\x12=\n" +
+	"\bmetadata\x18\x05 \x03(\v2!.errors.ErrorStatus.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x84\x01\n" +
@@ -254,8 +284,10 @@ const file_errors_proto_rawDesc = "" +
 	"\n" +
 	"ErrorChain\x12*\n" +
 	"\x04root\x18\x01 \x01(\v2\x16.errors.ErrorChainNodeR\x04root:A\n" +
-	"\fdefault_code\x12\x1c.google.protobuf.EnumOptions\x18\xb9\x8e\x03 \x01(\x05R\vdefaultCode:7\n" +
-	"\x04code\x12!.google.protobuf.EnumValueOptions\x18\xba\x8e\x03 \x01(\x05R\x04codeB'Z%github.com/dizzrt/ellie/errors;errorsb\x06proto3"
+	"\fdefault_code\x12\x1c.google.protobuf.EnumOptions\x18\xb9\x8e\x03 \x01(\x05R\vdefaultCode:E\n" +
+	"\x0edefault_status\x12\x1c.google.protobuf.EnumOptions\x18\xba\x8e\x03 \x01(\rR\rdefaultStatus:7\n" +
+	"\x04code\x12!.google.protobuf.EnumValueOptions\x18\xa1\x96\x03 \x01(\x05R\x04code:;\n" +
+	"\x06status\x12!.google.protobuf.EnumValueOptions\x18\xa2\x96\x03 \x01(\rR\x06statusB'Z%github.com/dizzrt/ellie/errors;errorsb\x06proto3"
 
 var (
 	file_errors_proto_rawDescOnce sync.Once
@@ -271,23 +303,25 @@ func file_errors_proto_rawDescGZIP() []byte {
 
 var file_errors_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_errors_proto_goTypes = []any{
-	(*Status)(nil),                        // 0: errors.Status
+	(*ErrorStatus)(nil),                   // 0: errors.ErrorStatus
 	(*ErrorChainNode)(nil),                // 1: errors.ErrorChainNode
 	(*ErrorChain)(nil),                    // 2: errors.ErrorChain
-	nil,                                   // 3: errors.Status.MetadataEntry
+	nil,                                   // 3: errors.ErrorStatus.MetadataEntry
 	(*descriptorpb.EnumOptions)(nil),      // 4: google.protobuf.EnumOptions
 	(*descriptorpb.EnumValueOptions)(nil), // 5: google.protobuf.EnumValueOptions
 }
 var file_errors_proto_depIdxs = []int32{
-	3, // 0: errors.Status.metadata:type_name -> errors.Status.MetadataEntry
+	3, // 0: errors.ErrorStatus.metadata:type_name -> errors.ErrorStatus.MetadataEntry
 	1, // 1: errors.ErrorChainNode.wrapped:type_name -> errors.ErrorChainNode
 	1, // 2: errors.ErrorChain.root:type_name -> errors.ErrorChainNode
 	4, // 3: errors.default_code:extendee -> google.protobuf.EnumOptions
-	5, // 4: errors.code:extendee -> google.protobuf.EnumValueOptions
-	5, // [5:5] is the sub-list for method output_type
-	5, // [5:5] is the sub-list for method input_type
-	5, // [5:5] is the sub-list for extension type_name
-	3, // [3:5] is the sub-list for extension extendee
+	4, // 4: errors.default_status:extendee -> google.protobuf.EnumOptions
+	5, // 5: errors.code:extendee -> google.protobuf.EnumValueOptions
+	5, // 6: errors.status:extendee -> google.protobuf.EnumValueOptions
+	7, // [7:7] is the sub-list for method output_type
+	7, // [7:7] is the sub-list for method input_type
+	7, // [7:7] is the sub-list for extension type_name
+	3, // [3:7] is the sub-list for extension extendee
 	0, // [0:3] is the sub-list for field type_name
 }
 
@@ -303,7 +337,7 @@ func file_errors_proto_init() {
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_errors_proto_rawDesc), len(file_errors_proto_rawDesc)),
 			NumEnums:      0,
 			NumMessages:   4,
-			NumExtensions: 2,
+			NumExtensions: 4,
 			NumServices:   0,
 		},
 		GoTypes:           file_errors_proto_goTypes,

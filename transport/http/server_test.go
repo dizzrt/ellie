@@ -46,15 +46,15 @@ func TestHTTPServer(t *testing.T) {
 	var opts = []http.ServerOption{
 		http.DefaultSuccessCode(10000),
 		http.DefaultSuccessMessage("success"),
-		http.ResponseEncoder(func(data any, err error, s *http.Server) (int, render.Render) {
-			code := http.HTTPStatusCodeFromError(err)
-			r := render.JSON{Data: gin.H{
-				"data": data,
-				"err":  err,
-				"ext":  "custom response encoder",
-			}}
-			return code, r
-		}),
+		// http.ResponseEncoder(func(data any, err error, s *http.Server) (int, render.Render) {
+		// 	code := http.HTTPStatusCodeFromError(err)
+		// 	r := render.JSON{Data: gin.H{
+		// 		"data": data,
+		// 		"err":  err,
+		// 		"ext":  "custom response encoder",
+		// 	}}
+		// 	return code, r
+		// }),
 	}
 	srv := http.NewServer(opts...)
 

@@ -114,16 +114,15 @@ func (s *Server) WrapHTTPResponse(data any, err error) gin.H {
 	message := s.defaultSuccessMessage
 
 	if err != nil {
-		if ee, ok := err.(*errors.Error); ok {
-			// ellie error
-			code = int(ee.Code)
-			message = ee.Message
+		if se, ok := err.(*errors.StandardError); ok {
+			// standard error
+			code = int(se.Code())
+			message = se.Message()
 		} else if st, ok := status.FromError(err); ok {
 			// grpc error
 			code = int(st.Code())
 			message = st.Message()
 		} else {
-			// unknown error type
 			code = -1
 			message = err.Error()
 		}
