@@ -3,6 +3,7 @@ syntax = "proto3";
 package ellie.errors;
 
 import "ellie/errors/status.proto";
+import "google/protobuf/descriptor.proto";
 
 option go_package = "github.com/dizzrt/ellie/errors;errors";
 
