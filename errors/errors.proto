@@ -2,25 +2,26 @@ syntax = "proto3";
 
 package errors;
 
-option go_package = "github.com/dizzrt/ellie/errors;errors";
-
+import "ellie/errors/status.proto";
 import "google/protobuf/descriptor.proto";
 
-message ErrorStatus {
+option go_package = "github.com/dizzrt/ellie/errors;errors";
+
+message ErrorCore {
   // grpc codes.Code
-  uint32 status = 1; 
+  uint32 status = 1;
 
   int32 code = 2;
   string reason = 3;
   string message = 4;
   map<string, string> metadata = 5;
-};
+}
 
 message ErrorChainNode {
   string type = 1;
-  string message = 2; 
+  string message = 2;
   bytes data = 3;
-  ErrorChainNode wrapped = 4; 
+  ErrorChainNode wrapped = 4;
 }
 
 message ErrorChain {
@@ -29,10 +30,10 @@ message ErrorChain {
 
 extend google.protobuf.EnumOptions {
   int32 default_code = 51001;
-  uint32 default_status = 51002;
+  ellie.errors.ErrorStatus default_status = 51002;
 }
 
 extend google.protobuf.EnumValueOptions {
   int32 code = 52001;
-  uint32 status = 52002;
+  ellie.errors.ErrorStatus status = 52002;
 }

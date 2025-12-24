@@ -16,13 +16,13 @@ var _ AdvancedError = (*StandardError)(nil)
 const _STANDARD_ERROR_TYPE = "standard_error"
 
 type StandardError struct {
-	cause       error
-	errorStatus ErrorStatus
+	cause error
+	core  ErrorCore
 }
 
 func NewStandardError(status codes.Code, code int, reason, message string) *StandardError {
 	return &StandardError{
-		errorStatus: ErrorStatus{
+		core: ErrorCore{
 			Status:  uint32(status),
 			Code:    int32(code),
 			Reason:  reason,
@@ -70,11 +70,11 @@ func (se *StandardError) Is(target error) bool {
 		return false
 	}
 
-	if se.errorStatus.GetCode() != temp.errorStatus.GetCode() {
+	if se.core.GetCode() != temp.core.GetCode() {
 		return false
 	}
 
-	if se.errorStatus.GetReason() != temp.errorStatus.GetReason() {
+	if se.core.GetReason() != temp.core.GetReason() {
 		return false
 	}
 
@@ -82,23 +82,23 @@ func (se *StandardError) Is(target error) bool {
 }
 
 func (se *StandardError) Status() codes.Code {
-	return codes.Code(se.errorStatus.GetStatus())
+	return codes.Code(se.core.GetStatus())
 }
 
 func (se *StandardError) Code() int32 {
-	return se.errorStatus.GetCode()
+	return se.core.GetCode()
 }
 
 func (se *StandardError) Reason() string {
-	return se.errorStatus.GetReason()
+	return se.core.GetReason()
 }
 
 func (se *StandardError) Message() string {
-	return se.errorStatus.GetMessage()
+	return se.core.GetMessage()
 }
 
 func (se *StandardError) Metadata() map[string]string {
-	return se.errorStatus.GetMetadata()
+	return se.core.GetMetadata()
 }
 
 func (se *StandardError) Cause() error {
@@ -106,22 +106,22 @@ func (se *StandardError) Cause() error {
 }
 
 func (se *StandardError) WithStatus(status codes.Code) AdvancedError {
-	se.errorStatus.Status = uint32(status)
+	se.core.Status = uint32(status)
 	return se
 }
 
 func (se *StandardError) WithCode(code int32) AdvancedError {
-	se.errorStatus.Code = code
+	se.core.Code = code
 	return se
 }
 
 func (se *StandardError) WithReason(reason string) AdvancedError {
-	se.errorStatus.Reason = reason
+	se.core.Reason = reason
 	return se
 }
 
 func (se *StandardError) WithMessage(message string) AdvancedError {
-	se.errorStatus.Message = message
+	se.core.Message = message
 	return se
 }
 
@@ -131,7 +131,7 @@ func (se *StandardError) WithMetadata(metadata map[string]string) AdvancedError 
 		return nil
 	}
 
-	see.errorStatus.Metadata = metadata
+	see.core.Metadata = metadata
 	return see
 }
 
@@ -158,20 +158,20 @@ func (se *StandardError) Marshal() ([]byte, error) {
 }
 
 func (se *StandardError) Error() string {
-	st := codes.Code(se.errorStatus.GetStatus()).String()
+	st := codes.Code(se.core.GetStatus()).String()
 	errorInfo := map[string]any{
 		"status": st,
-		"code":   se.errorStatus.GetCode(),
-		"reason": se.errorStatus.GetReason(),
+		"code":   se.core.GetCode(),
+		"reason": se.core.GetReason(),
 	}
 
 	// Add message if it's not empty
-	if message := se.errorStatus.GetMessage(); message != "" {
+	if message := se.core.GetMessage(); message != "" {
 		errorInfo["message"] = message
 	}
 
 	// Add metadata if it's not nil and not empty
-	if metadata := se.errorStatus.GetMetadata(); len(metadata) > 0 {
+	if metadata := se.core.GetMetadata(); len(metadata) > 0 {
 		errorInfo["metadata"] = metadata
 	}
 
@@ -185,9 +185,9 @@ func (se *StandardError) Error() string {
 	if err != nil {
 		// Fallback to simple format if JSON marshaling fails
 		baseMsg := "standard_error"
-		if msg := se.errorStatus.GetMessage(); msg != "" {
+		if msg := se.core.GetMessage(); msg != "" {
 			baseMsg = msg
-		} else if reason := se.errorStatus.GetReason(); reason != "" {
+		} else if reason := se.core.GetReason(); reason != "" {
 			baseMsg = reason
 		}
 		return baseMsg
@@ -206,11 +206,11 @@ func (se *StandardError) Clone() *StandardError {
 	maps.Copy(metadata, seMetadata)
 
 	return &StandardError{
-		errorStatus: ErrorStatus{
-			Status:   se.errorStatus.Status,
-			Code:     se.errorStatus.Code,
-			Reason:   se.errorStatus.Reason,
-			Message:  se.errorStatus.Message,
+		core: ErrorCore{
+			Status:   se.core.Status,
+			Code:     se.core.Code,
+			Reason:   se.core.Reason,
+			Message:  se.core.Message,
 			Metadata: metadata,
 		},
 		cause: se.cause,

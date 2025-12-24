@@ -22,7 +22,7 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ErrorStatus struct {
+type ErrorCore struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// grpc codes.Code
 	Status        uint32            `protobuf:"varint,1,opt,name=status,proto3" json:"status,omitempty"`
@@ -34,20 +34,20 @@ type ErrorStatus struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ErrorStatus) Reset() {
-	*x = ErrorStatus{}
+func (x *ErrorCore) Reset() {
+	*x = ErrorCore{}
 	mi := &file_errors_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ErrorStatus) String() string {
+func (x *ErrorCore) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ErrorStatus) ProtoMessage() {}
+func (*ErrorCore) ProtoMessage() {}
 
-func (x *ErrorStatus) ProtoReflect() protoreflect.Message {
+func (x *ErrorCore) ProtoReflect() protoreflect.Message {
 	mi := &file_errors_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -59,40 +59,40 @@ func (x *ErrorStatus) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ErrorStatus.ProtoReflect.Descriptor instead.
-func (*ErrorStatus) Descriptor() ([]byte, []int) {
+// Deprecated: Use ErrorCore.ProtoReflect.Descriptor instead.
+func (*ErrorCore) Descriptor() ([]byte, []int) {
 	return file_errors_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ErrorStatus) GetStatus() uint32 {
+func (x *ErrorCore) GetStatus() uint32 {
 	if x != nil {
 		return x.Status
 	}
 	return 0
 }
 
-func (x *ErrorStatus) GetCode() int32 {
+func (x *ErrorCore) GetCode() int32 {
 	if x != nil {
 		return x.Code
 	}
 	return 0
 }
 
-func (x *ErrorStatus) GetReason() string {
+func (x *ErrorCore) GetReason() string {
 	if x != nil {
 		return x.Reason
 	}
 	return ""
 }
 
-func (x *ErrorStatus) GetMessage() string {
+func (x *ErrorCore) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
 	return ""
 }
 
-func (x *ErrorStatus) GetMetadata() map[string]string {
+func (x *ErrorCore) GetMetadata() map[string]string {
 	if x != nil {
 		return x.Metadata
 	}
@@ -222,10 +222,10 @@ var file_errors_proto_extTypes = []protoimpl.ExtensionInfo{
 	},
 	{
 		ExtendedType:  (*descriptorpb.EnumOptions)(nil),
-		ExtensionType: (*uint32)(nil),
+		ExtensionType: (*ErrorStatus)(nil),
 		Field:         51002,
 		Name:          "errors.default_status",
-		Tag:           "varint,51002,opt,name=default_status",
+		Tag:           "varint,51002,opt,name=default_status,enum=ellie.errors.ErrorStatus",
 		Filename:      "errors.proto",
 	},
 	{
@@ -238,10 +238,10 @@ var file_errors_proto_extTypes = []protoimpl.ExtensionInfo{
 	},
 	{
 		ExtendedType:  (*descriptorpb.EnumValueOptions)(nil),
-		ExtensionType: (*uint32)(nil),
+		ExtensionType: (*ErrorStatus)(nil),
 		Field:         52002,
 		Name:          "errors.status",
-		Tag:           "varint,52002,opt,name=status",
+		Tag:           "varint,52002,opt,name=status,enum=ellie.errors.ErrorStatus",
 		Filename:      "errors.proto",
 	},
 }
@@ -250,7 +250,7 @@ var file_errors_proto_extTypes = []protoimpl.ExtensionInfo{
 var (
 	// optional int32 default_code = 51001;
 	E_DefaultCode = &file_errors_proto_extTypes[0]
-	// optional uint32 default_status = 51002;
+	// optional ellie.errors.ErrorStatus default_status = 51002;
 	E_DefaultStatus = &file_errors_proto_extTypes[1]
 )
 
@@ -258,7 +258,7 @@ var (
 var (
 	// optional int32 code = 52001;
 	E_Code = &file_errors_proto_extTypes[2]
-	// optional uint32 status = 52002;
+	// optional ellie.errors.ErrorStatus status = 52002;
 	E_Status = &file_errors_proto_extTypes[3]
 )
 
@@ -266,13 +266,13 @@ var File_errors_proto protoreflect.FileDescriptor
 
 const file_errors_proto_rawDesc = "" +
 	"\n" +
-	"\ferrors.proto\x12\x06errors\x1a google/protobuf/descriptor.proto\"\xe7\x01\n" +
-	"\vErrorStatus\x12\x16\n" +
+	"\ferrors.proto\x12\x06errors\x1a\x19ellie/errors/status.proto\x1a google/protobuf/descriptor.proto\"\xe3\x01\n" +
+	"\tErrorCore\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\rR\x06status\x12\x12\n" +
 	"\x04code\x18\x02 \x01(\x05R\x04code\x12\x16\n" +
 	"\x06reason\x18\x03 \x01(\tR\x06reason\x12\x18\n" +
-	"\amessage\x18\x04 \x01(\tR\amessage\x12=\n" +
-	"\bmetadata\x18\x05 \x03(\v2!.errors.ErrorStatus.MetadataEntryR\bmetadata\x1a;\n" +
+	"\amessage\x18\x04 \x01(\tR\amessage\x12;\n" +
+	"\bmetadata\x18\x05 \x03(\v2\x1f.errors.ErrorCore.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\x84\x01\n" +
@@ -284,10 +284,10 @@ const file_errors_proto_rawDesc = "" +
 	"\n" +
 	"ErrorChain\x12*\n" +
 	"\x04root\x18\x01 \x01(\v2\x16.errors.ErrorChainNodeR\x04root:A\n" +
-	"\fdefault_code\x12\x1c.google.protobuf.EnumOptions\x18\xb9\x8e\x03 \x01(\x05R\vdefaultCode:E\n" +
-	"\x0edefault_status\x12\x1c.google.protobuf.EnumOptions\x18\xba\x8e\x03 \x01(\rR\rdefaultStatus:7\n" +
-	"\x04code\x12!.google.protobuf.EnumValueOptions\x18\xa1\x96\x03 \x01(\x05R\x04code:;\n" +
-	"\x06status\x12!.google.protobuf.EnumValueOptions\x18\xa2\x96\x03 \x01(\rR\x06statusB'Z%github.com/dizzrt/ellie/errors;errorsb\x06proto3"
+	"\fdefault_code\x12\x1c.google.protobuf.EnumOptions\x18\xb9\x8e\x03 \x01(\x05R\vdefaultCode:`\n" +
+	"\x0edefault_status\x12\x1c.google.protobuf.EnumOptions\x18\xba\x8e\x03 \x01(\x0e2\x19.ellie.errors.ErrorStatusR\rdefaultStatus:7\n" +
+	"\x04code\x12!.google.protobuf.EnumValueOptions\x18\xa1\x96\x03 \x01(\x05R\x04code:V\n" +
+	"\x06status\x12!.google.protobuf.EnumValueOptions\x18\xa2\x96\x03 \x01(\x0e2\x19.ellie.errors.ErrorStatusR\x06statusB'Z%github.com/dizzrt/ellie/errors;errorsb\x06proto3"
 
 var (
 	file_errors_proto_rawDescOnce sync.Once
@@ -303,24 +303,27 @@ func file_errors_proto_rawDescGZIP() []byte {
 
 var file_errors_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_errors_proto_goTypes = []any{
-	(*ErrorStatus)(nil),                   // 0: errors.ErrorStatus
+	(*ErrorCore)(nil),                     // 0: errors.ErrorCore
 	(*ErrorChainNode)(nil),                // 1: errors.ErrorChainNode
 	(*ErrorChain)(nil),                    // 2: errors.ErrorChain
-	nil,                                   // 3: errors.ErrorStatus.MetadataEntry
+	nil,                                   // 3: errors.ErrorCore.MetadataEntry
 	(*descriptorpb.EnumOptions)(nil),      // 4: google.protobuf.EnumOptions
 	(*descriptorpb.EnumValueOptions)(nil), // 5: google.protobuf.EnumValueOptions
+	(ErrorStatus)(0),                      // 6: ellie.errors.ErrorStatus
 }
 var file_errors_proto_depIdxs = []int32{
-	3, // 0: errors.ErrorStatus.metadata:type_name -> errors.ErrorStatus.MetadataEntry
+	3, // 0: errors.ErrorCore.metadata:type_name -> errors.ErrorCore.MetadataEntry
 	1, // 1: errors.ErrorChainNode.wrapped:type_name -> errors.ErrorChainNode
 	1, // 2: errors.ErrorChain.root:type_name -> errors.ErrorChainNode
 	4, // 3: errors.default_code:extendee -> google.protobuf.EnumOptions
 	4, // 4: errors.default_status:extendee -> google.protobuf.EnumOptions
 	5, // 5: errors.code:extendee -> google.protobuf.EnumValueOptions
 	5, // 6: errors.status:extendee -> google.protobuf.EnumValueOptions
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
+	6, // 7: errors.default_status:type_name -> ellie.errors.ErrorStatus
+	6, // 8: errors.status:type_name -> ellie.errors.ErrorStatus
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	7, // [7:9] is the sub-list for extension type_name
 	3, // [3:7] is the sub-list for extension extendee
 	0, // [0:3] is the sub-list for field type_name
 }
@@ -330,6 +333,7 @@ func file_errors_proto_init() {
 	if File_errors_proto != nil {
 		return
 	}
+	file_ellie_errors_status_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
