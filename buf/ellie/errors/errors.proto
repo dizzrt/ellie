@@ -7,11 +7,11 @@ import "ellie/errors/status.proto";
 option go_package = "github.com/dizzrt/ellie/errors;errors";
 
 extend google.protobuf.EnumOptions {
-  int32 default_code = 51001;
+  int32       default_code   = 51001;
   ErrorStatus default_status = 51002;
 }
 
 extend google.protobuf.EnumValueOptions {
-  int32 code = 52001;
+  int32       code   = 52001;
   ErrorStatus status = 52002;
 }
