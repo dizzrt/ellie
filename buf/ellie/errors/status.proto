@@ -6,7 +6,7 @@ option go_package = "github.com/dizzrt/ellie/errors;errors";
 
 enum ErrorStatus {
   // fallback to UNKNOWN
-  ERROR_STATUS_UNDEFINED = 0;
+  ERROR_STATUS_UNSPECIFIED = 0;
 
   // OK is returned on success.
   ERROR_STATUS_OK = 1;
