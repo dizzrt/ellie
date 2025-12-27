@@ -5,6 +5,7 @@ import (
 
 	"github.com/dizzrt/ellie/errors"
 	"github.com/gin-gonic/gin"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
@@ -14,7 +15,12 @@ func HTTPStatusCodeFromError(err error) int {
 	}
 
 	if se, ok := err.(*errors.StandardError); ok {
-		return HTTPStatusFromGRPCCode(se.Status())
+		status := codes.Unknown
+		if se.Status() != nil {
+			status = *se.Status()
+		}
+
+		return HTTPStatusFromGRPCCode(status)
 	}
 
 	if st, ok := status.FromError(err); ok {

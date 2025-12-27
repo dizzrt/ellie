@@ -11,7 +11,7 @@ type AdvancedError interface {
 	Is(error) bool
 
 	// getters
-	Status() codes.Code
+	Status() *codes.Code
 	Code() int32
 	Reason() string
 	Message() string
@@ -30,7 +30,7 @@ type AdvancedError interface {
 }
 
 func New(code int, reason, message string) error {
-	return NewStandardError(codes.Unknown, code, reason, message)
+	return NewStandardError(nil, code, reason, message)
 }
 
 func Newf(code int, reason, format string, a ...any) error {
@@ -39,4 +39,13 @@ func Newf(code int, reason, format string, a ...any) error {
 
 func Errorf(code int, reason, format string, a ...any) error {
 	return New(code, reason, fmt.Sprintf(format, a...))
+}
+
+func StatusPtrFromInt(code int) *codes.Code {
+	if code < 0 || code >= GRPC_STATUS_MAX_CODE {
+		return nil
+	}
+
+	temp := codes.Code(code)
+	return &temp
 }

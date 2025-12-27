@@ -9,17 +9,17 @@ import (
 	"github.com/dizzrt/ellie/errors"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/pluginpb"
 )
 
 const (
-	release = "v1.1.0"
+	release = "v1.1.1"
 
 	// packages
 	errorsPackage = protogen.GoImportPath("github.com/dizzrt/ellie/errors")
+	codesPackage  = protogen.GoImportPath("google.golang.org/grpc/codes")
 )
 
 var showVersion = flag.Bool("version", false, "print the version and exit")
@@ -77,6 +77,7 @@ func handle(p *protogen.Plugin, f *protogen.File) *protogen.GeneratedFile {
 	gf.P("package ", f.GoPackageName)
 	gf.P()
 	gf.QualifiedGoIdent(errorsPackage.Ident(""))
+	gf.QualifiedGoIdent(codesPackage.Ident(""))
 	generateContent(p, f, gf)
 
 	return gf
@@ -108,11 +109,11 @@ func generateErrorsReason(_ *protogen.Plugin, _ *protogen.File, gf *protogen.Gen
 		}
 	}
 
-	defaultStatus := uint32(codes.Unknown)
+	defaultStatus := errors.ErrorStatus_ERROR_STATUS_UNSPECIFIED
 	edStatus := proto.GetExtension(enum.Desc.Options(), errors.E_DefaultStatus)
 	if edStatus != nil {
-		if v, ok := edStatus.(uint32); ok && v > 0 {
-			defaultStatus = v - 1
+		if v, ok := edStatus.(errors.ErrorStatus); ok {
+			defaultStatus = v
 		}
 	}
 
@@ -130,8 +131,10 @@ func generateErrorsReason(_ *protogen.Plugin, _ *protogen.File, gf *protogen.Gen
 
 		status := defaultStatus
 		estatus := proto.GetExtension(v.Desc.Options(), errors.E_Status)
-		if ok := estatus.(uint32); ok > 0 {
-			status = ok - 1
+		if estatus != nil {
+			if temp, ok := estatus.(errors.ErrorStatus); ok && temp != errors.ErrorStatus_ERROR_STATUS_UNSPECIFIED {
+				status = temp
+			}
 		}
 
 		comment := v.Comments.Leading.String()
@@ -144,7 +147,8 @@ func generateErrorsReason(_ *protogen.Plugin, _ *protogen.File, gf *protogen.Gen
 			Value:      string(v.Desc.Name()),
 			CamelValue: case2Camel(string(v.Desc.Name())),
 			Code:       code,
-			Status:     status,
+			Status:     int32(status) - 1, // there is a offset 1 between ErrorStatus and grpc.Code
+			StatusName: errorStatusName(status),
 			Comment:    comment,
 			HasComment: len(comment) > 0,
 		}
@@ -189,4 +193,47 @@ func case2Camel(name string) string {
 	}
 
 	return strings.Join(words, "")
+}
+
+func errorStatusName(status errors.ErrorStatus) string {
+	switch status {
+	case errors.ErrorStatus_ERROR_STATUS_UNSPECIFIED:
+		return "Unspecified"
+	case errors.ErrorStatus_ERROR_STATUS_OK:
+		return "Ok"
+	case errors.ErrorStatus_ERROR_STATUS_CANCELED:
+		return "Canceled"
+	case errors.ErrorStatus_ERROR_STATUS_UNKNOWN:
+		return "Unknown"
+	case errors.ErrorStatus_ERROR_STATUS_INVALID_ARGUMENT:
+		return "InvalidArgument"
+	case errors.ErrorStatus_ERROR_STATUS_DEADLINE_EXCEEDED:
+		return "DeadlineExceeded"
+	case errors.ErrorStatus_ERROR_STATUS_NOT_FOUND:
+		return "NotFound"
+	case errors.ErrorStatus_ERROR_STATUS_ALREADY_EXISTS:
+		return "AlreadyExists"
+	case errors.ErrorStatus_ERROR_STATUS_PERMISSION_DENIED:
+		return "PermissionDenied"
+	case errors.ErrorStatus_ERROR_STATUS_RESOURCE_EXHAUSTED:
+		return "ResourceExhausted"
+	case errors.ErrorStatus_ERROR_STATUS_FAILED_PRECONDITION:
+		return "FailedPrecondition"
+	case errors.ErrorStatus_ERROR_STATUS_ABORTED:
+		return "Aborted"
+	case errors.ErrorStatus_ERROR_STATUS_OUT_OF_RANGE:
+		return "OutOfRange"
+	case errors.ErrorStatus_ERROR_STATUS_UNIMPLEMENTED:
+		return "Unimplemented"
+	case errors.ErrorStatus_ERROR_STATUS_INTERNAL:
+		return "Internal"
+	case errors.ErrorStatus_ERROR_STATUS_UNAVAILABLE:
+		return "Unavailable"
+	case errors.ErrorStatus_ERROR_STATUS_DATA_LOSS:
+		return "DataLoss"
+	case errors.ErrorStatus_ERROR_STATUS_UNAUTHENTICATED:
+		return "Unauthenticated"
+	}
+
+	return "Unspecified"
 }

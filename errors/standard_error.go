@@ -13,6 +13,8 @@ import (
 
 var _ AdvancedError = (*StandardError)(nil)
 
+const GRPC_STATUS_MAX_CODE = 17
+
 const _STANDARD_ERROR_TYPE = "standard_error"
 
 type StandardError struct {
@@ -20,10 +22,16 @@ type StandardError struct {
 	core  ErrorCore
 }
 
-func NewStandardError(status codes.Code, code int, reason, message string) *StandardError {
+func NewStandardError(status *codes.Code, code int, reason, message string) *StandardError {
+	var statusPtr *int32 = nil
+	if status != nil {
+		temp := int32(*status)
+		statusPtr = &temp
+	}
+
 	return &StandardError{
 		core: ErrorCore{
-			Status:  uint32(status),
+			Status:  statusPtr,
 			Code:    int32(code),
 			Reason:  reason,
 			Message: message,
@@ -31,7 +39,7 @@ func NewStandardError(status codes.Code, code int, reason, message string) *Stan
 	}
 }
 
-func NewStandardErrorf(status codes.Code, code int, reason, format string, a ...any) *StandardError {
+func NewStandardErrorf(status *codes.Code, code int, reason, format string, a ...any) *StandardError {
 	return NewStandardError(status, code, reason, fmt.Sprintf(format, a...))
 }
 
@@ -45,7 +53,8 @@ func NewStandardErrorFromError(err error) *StandardError {
 	}
 
 	if st, ok := status.FromError(err); ok {
-		se := NewStandardError(st.Code(), -1, "CONVERT_FROM_GRPC_STATUS", st.Message())
+		scode := st.Code()
+		se := NewStandardError(&scode, -1, "CONVERT_FROM_GRPC_STATUS", st.Message())
 		for _, detail := range st.Details() {
 			switch ty := detail.(type) {
 			case *errdetails.ErrorInfo:
@@ -56,7 +65,8 @@ func NewStandardErrorFromError(err error) *StandardError {
 		}
 	}
 
-	se := NewStandardError(codes.Unknown, -1, "CONVERT_FROM_ERROR", err.Error())
+	scode := codes.Unknown
+	se := NewStandardError(&scode, -1, "CONVERT_FROM_ERROR", err.Error())
 	return se
 }
 
@@ -81,8 +91,20 @@ func (se *StandardError) Is(target error) bool {
 	return true
 }
 
-func (se *StandardError) Status() codes.Code {
-	return codes.Code(se.core.GetStatus())
+func (se *StandardError) Status() *codes.Code {
+	if se.core.Status == nil {
+		return nil
+	}
+
+	var temp codes.Code
+	v := se.core.GetStatus()
+	if v < 0 || v >= GRPC_STATUS_MAX_CODE {
+		temp = codes.Unknown
+	} else {
+		temp = codes.Code(v)
+	}
+
+	return &temp
 }
 
 func (se *StandardError) Code() int32 {
@@ -106,7 +128,8 @@ func (se *StandardError) Cause() error {
 }
 
 func (se *StandardError) WithStatus(status codes.Code) AdvancedError {
-	se.core.Status = uint32(status)
+	temp := int32(status)
+	se.core.Status = &temp
 	return se
 }
 
@@ -157,40 +180,52 @@ func (se *StandardError) Marshal() ([]byte, error) {
 	return json.Marshal(se)
 }
 
-func (se *StandardError) Error() string {
-	st := codes.Code(se.core.GetStatus()).String()
-	errorInfo := map[string]any{
-		"status": st,
-		"code":   se.core.GetCode(),
-		"reason": se.core.GetReason(),
+func (se *StandardError) MapError() map[string]any {
+	mp := map[string]any{
+		"code":   se.Code(),
+		"reason": se.Reason(),
+	}
+
+	// Add status if it's not nil
+	if status := se.Status(); status != nil {
+		mp["status"] = status.String()
 	}
 
 	// Add message if it's not empty
-	if message := se.core.GetMessage(); message != "" {
-		errorInfo["message"] = message
+	if message := se.Message(); message != "" {
+		mp["message"] = message
 	}
 
 	// Add metadata if it's not nil and not empty
-	if metadata := se.core.GetMetadata(); len(metadata) > 0 {
-		errorInfo["metadata"] = metadata
+	if metadata := se.Metadata(); len(metadata) > 0 {
+		mp["metadata"] = metadata
 	}
 
 	// Add cause if it's not nil
 	if se.cause != nil {
-		errorInfo["cause"] = se.cause.Error()
+		err := se.cause
+		if ee, ok := err.(*StandardError); ok {
+			mp["cause"] = ee.MapError()
+		} else {
+			mp["cause"] = se.cause.Error()
+		}
 	}
 
-	// Marshal to JSON
-	errBytes, err := json.Marshal(errorInfo)
+	return mp
+}
+
+func (se *StandardError) Error() string {
+	emap := se.MapError()
+
+	errBytes, err := json.Marshal(emap)
 	if err != nil {
-		// Fallback to simple format if JSON marshaling fails
-		baseMsg := "standard_error"
-		if msg := se.core.GetMessage(); msg != "" {
-			baseMsg = msg
-		} else if reason := se.core.GetReason(); reason != "" {
-			baseMsg = reason
+		// fallback to simple format if JSON marshaling fails
+		msg := fmt.Sprintf("[%d][%s]", se.Code(), se.Reason())
+		if m := se.Message(); m != "" {
+			msg += m
 		}
-		return baseMsg
+
+		return msg
 	}
 
 	return string(errBytes)

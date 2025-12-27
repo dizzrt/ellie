@@ -8,13 +8,13 @@ import "google/protobuf/descriptor.proto";
 option go_package = "github.com/dizzrt/ellie/errors;errors";
 
 message ErrorCore {
-  // grpc codes.Code
-  uint32 status = 1;
-
   int32 code = 2;
   string reason = 3;
   string message = 4;
   map<string, string> metadata = 5;
+
+  // grpc codes.Code(status - 1)
+  optional int32 status = 1;
 }
 
 message ErrorChainNode {

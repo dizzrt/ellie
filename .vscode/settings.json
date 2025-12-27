@@ -1,4 +1,6 @@
 {
+  "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
   "protobuf.protoc.path": "protoc",
   "protobuf.protoc.options": [
     "--proto_path=${workspaceFolder}/**",

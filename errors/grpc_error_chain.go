@@ -152,16 +152,23 @@ func recursiveUnmarshal(node *ErrorChainNode) error {
 }
 
 func WrpGRPCResponse[T any](data T, err error) (T, error) {
-	if _, ok := status.FromError(err); ok {
-		return data, err
+	if err == nil {
+		return data, nil
+	}
+
+	scode := codes.Unknown
+	if st, ok := status.FromError(err); ok {
+		scode = st.Code()
 	}
 
 	if se, ok := err.(*StandardError); ok {
-		status := se.Status()
-		return data, Marshal(status, err)
+		temp := se.Status()
+		if temp != nil {
+			scode = *temp
+		}
 	}
 
-	return data, err
+	return data, Marshal(scode, err)
 }
 
 func UnwrapGRPCResponse[T any](data T, err error) (T, error) {

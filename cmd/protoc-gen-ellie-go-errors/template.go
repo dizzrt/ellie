@@ -13,7 +13,8 @@ type errorInfo struct {
 	Name       string
 	Value      string
 	Code       int
-	Status     uint32
+	Status     int32
+	StatusName string
 	CamelValue string
 	Comment    string
 	HasComment bool
