@@ -11,7 +11,7 @@ func Is{{.CamelValue}}(err error) bool {
 }
 
 {{ if .HasComment }}{{ .Comment }}{{ end }}
-func {{ .CamelValue }}() *errors.StandardError {
+func {{ .CamelValue }}() errors.AdvancedError {
     var status *codes.Code = nil
     {{ if ge .Status 0 }}status = errors.StatusPtrFromInt({{ .Status }}) // {{ .StatusName }}{{ end }}
 

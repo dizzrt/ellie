@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	release = "v1.1.1"
+	release = "v1.1.2"
 
 	// packages
 	errorsPackage = protogen.GoImportPath("github.com/dizzrt/ellie/errors")
