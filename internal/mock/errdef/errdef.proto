@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package errdef;
+
+import "ellie/errors/errors.proto";
+import "ellie/errors/status.proto";
+
+option go_package = "github.com/dizzrt/ellie/internal/mock/errdef;errdef";
+
+enum Errors {
+  // option (ellie.errors.default_status) = ERROR_STATUS_OK;
+
+  UNKNOWN = 0 [(ellie.errors.code) = 0];
+
+  Success = 100000 [
+    (ellie.errors.code) = 100000,
+    (ellie.errors.status) = ERROR_STATUS_OK
+  ];
+
+  InvalidParams = 100001 [
+    (ellie.errors.code) = 100001,
+    (ellie.errors.status) = ERROR_STATUS_INVALID_ARGUMENT
+  ];
+
+  InvalidToken = 100002 [(ellie.errors.code) = 100002 /* (ellie.errors.status) = ERROR_STATUS_INVALID_ARGUMENT */];
+}
