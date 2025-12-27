@@ -143,8 +143,8 @@ func (se *StandardError) WithReason(reason string) AdvancedError {
 	return se
 }
 
-func (se *StandardError) WithMessage(message string) AdvancedError {
-	se.core.Message = message
+func (se *StandardError) WithMessage(format string, a ...any) AdvancedError {
+	se.core.Message = fmt.Sprintf(format, a...)
 	return se
 }
 

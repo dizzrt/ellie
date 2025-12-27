@@ -22,7 +22,7 @@ type AdvancedError interface {
 	WithStatus(codes.Code) AdvancedError
 	WithCode(int32) AdvancedError
 	WithReason(string) AdvancedError
-	WithMessage(string) AdvancedError
+	WithMessage(string, ...any) AdvancedError
 	WithMetadata(map[string]string) AdvancedError
 	WithCause(error) AdvancedError
 
