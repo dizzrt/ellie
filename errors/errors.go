@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type AdvancedError interface {
@@ -48,4 +49,27 @@ func StatusPtrFromInt(code int) *codes.Code {
 
 	temp := codes.Code(code)
 	return &temp
+}
+
+func StatusCodeFromError(err error) codes.Code {
+	if err == nil {
+		// if error is nil, return ok code
+		return codes.OK
+	}
+
+	// if error is grpc status error, return its code directly
+	if st, ok := status.FromError(err); ok {
+		return st.Code()
+	}
+
+	// if error is advanced error, return its status code when it is set
+	if ae, ok := err.(AdvancedError); ok {
+		sptr := ae.Status()
+		if sptr != nil {
+			return *sptr
+		}
+	}
+
+	// default to unknown code
+	return codes.Unknown
 }

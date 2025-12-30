@@ -40,6 +40,13 @@ func Marshal(code codes.Code, err error) error {
 		return nil
 	}
 
+	// if error is already chianed, return it directly
+	if st, ok := status.FromError(err); ok {
+		if chain := tryGetErrorChainFromStatus(st); chain != nil {
+			return err
+		}
+	}
+
 	rootNode := recursiveMarshal(err)
 	chain := &ErrorChain{
 		Root: rootNode,
@@ -89,16 +96,7 @@ func recursiveMarshal(err error) *ErrorChainNode {
 	return node
 }
 
-func Unmarshal(err error) error {
-	if err == nil {
-		return nil
-	}
-
-	st, ok := status.FromError(err)
-	if !ok {
-		return err
-	}
-
+func tryGetErrorChainFromStatus(st *status.Status) *ErrorChain {
 	var chain *ErrorChain
 	for _, detail := range st.Details() {
 		anyDetail, ok := detail.(*anypb.Any)
@@ -115,6 +113,20 @@ func Unmarshal(err error) error {
 		break
 	}
 
+	return chain
+}
+
+func Unmarshal(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	st, ok := status.FromError(err)
+	if !ok {
+		return err
+	}
+
+	chain := tryGetErrorChainFromStatus(st)
 	if chain == nil || chain.Root == nil {
 		return st.Err()
 	}
