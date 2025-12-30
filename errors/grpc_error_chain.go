@@ -35,7 +35,7 @@ func RegisterChainableErrorType(ty string, fn func(string, []byte) error) error 
 	return nil
 }
 
-func Marshal(code codes.Code, err error) error {
+func PackErrorChain(code codes.Code, err error) error {
 	if err == nil {
 		return nil
 	}
@@ -47,7 +47,7 @@ func Marshal(code codes.Code, err error) error {
 		}
 	}
 
-	rootNode := recursiveMarshal(err)
+	rootNode := recursivePack(err)
 	chain := &ErrorChain{
 		Root: rootNode,
 	}
@@ -66,7 +66,7 @@ func Marshal(code codes.Code, err error) error {
 	return st.Err()
 }
 
-func recursiveMarshal(err error) *ErrorChainNode {
+func recursivePack(err error) *ErrorChainNode {
 	if err == nil {
 		return nil
 	}
@@ -90,7 +90,7 @@ func recursiveMarshal(err error) *ErrorChainNode {
 
 	wrappedErr := errors.Unwrap(err)
 	if wrappedErr != nil {
-		node.Wrapped = recursiveMarshal(wrappedErr)
+		node.Wrapped = recursivePack(wrappedErr)
 	}
 
 	return node
@@ -116,7 +116,7 @@ func tryGetErrorChainFromStatus(st *status.Status) *ErrorChain {
 	return chain
 }
 
-func Unmarshal(err error) error {
+func UnpackErrorChain(err error) error {
 	if err == nil {
 		return nil
 	}
@@ -131,10 +131,10 @@ func Unmarshal(err error) error {
 		return st.Err()
 	}
 
-	return recursiveUnmarshal(chain.Root)
+	return recursiveUnpack(chain.Root)
 }
 
-func recursiveUnmarshal(node *ErrorChainNode) error {
+func recursiveUnpack(node *ErrorChainNode) error {
 	if node == nil {
 		return nil
 	}
@@ -151,7 +151,7 @@ func recursiveUnmarshal(node *ErrorChainNode) error {
 		err = errors.New(node.GetMessage())
 	}
 
-	wrappedErr := recursiveUnmarshal(node.Wrapped)
+	wrappedErr := recursiveUnpack(node.Wrapped)
 	if wrappedErr != nil {
 		if ce, ok := err.(Chainable); ok {
 			err = ce.Wrap(wrappedErr)
@@ -168,21 +168,10 @@ func WrpGRPCResponse[T any](data T, err error) (T, error) {
 		return data, nil
 	}
 
-	scode := codes.Unknown
-	if st, ok := status.FromError(err); ok {
-		scode = st.Code()
-	}
-
-	if se, ok := err.(*StandardError); ok {
-		temp := se.Status()
-		if temp != nil {
-			scode = *temp
-		}
-	}
-
-	return data, Marshal(scode, err)
+	code := StatusCodeFromError(err)
+	return data, PackErrorChain(code, err)
 }
 
 func UnwrapGRPCResponse[T any](data T, err error) (T, error) {
-	return data, Unmarshal(err)
+	return data, UnpackErrorChain(err)
 }
