@@ -163,7 +163,7 @@ func recursiveUnpack(node *ErrorChainNode) error {
 	return err
 }
 
-func WrpGRPCResponse[T any](data T, err error) (T, error) {
+func WrapGRPCResponse[T any](data T, err error) (T, error) {
 	if err == nil {
 		return data, nil
 	}
