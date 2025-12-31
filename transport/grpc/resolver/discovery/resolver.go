@@ -2,10 +2,10 @@ package discovery
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 
+	"github.com/bytedance/sonic"
 	"github.com/dizzrt/ellie/internal/endpoint"
 	"github.com/dizzrt/ellie/log"
 	"github.com/dizzrt/ellie/registry"
@@ -99,7 +99,7 @@ func (r *discoveryResolver) update(ins []*registry.ServiceInstance) {
 	}
 
 	if r.debugLog {
-		b, _ := json.Marshal(filtered)
+		b, _ := sonic.Marshal(filtered)
 		log.Infof("[resolver] update instances: %s", b)
 	}
 }

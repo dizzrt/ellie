@@ -2,11 +2,11 @@ package ginx
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"maps"
 	"strings"
 
+	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
 	"github.com/go-viper/mapstructure/v2"
 )
@@ -91,7 +91,7 @@ func parseBody(ctx *gin.Context, inMap map[string]any) error {
 
 func parseJsonBody(rawBody []byte) (map[string]any, error) {
 	var body map[string]any
-	if err := json.Unmarshal(rawBody, &body); err != nil {
+	if err := sonic.Unmarshal(rawBody, &body); err != nil {
 		return nil, err
 	}
 

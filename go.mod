@@ -5,6 +5,7 @@ go 1.25.3
 replace github.com/dizzrt/ellie/contrib/registry/consul => ./contrib/registry/consul
 
 require (
+	github.com/bytedance/sonic v1.14.2
 	github.com/dizzrt/ellie/contrib/registry/consul v0.0.0-20251111182503-e174ce255678
 	github.com/dizzrt/filerotator v0.2.1
 	github.com/gin-gonic/gin v1.10.1
@@ -32,8 +33,7 @@ require (
 require (
 	github.com/armon/go-metrics v0.4.1 // indirect
 	github.com/bytedance/gopkg v0.1.3 // indirect
-	github.com/bytedance/sonic v1.14.1 // indirect
-	github.com/bytedance/sonic/loader v0.3.0 // indirect
+	github.com/bytedance/sonic/loader v0.4.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect

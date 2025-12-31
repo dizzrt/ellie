@@ -1,11 +1,12 @@
 package errors
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"maps"
 
+	"github.com/bytedance/sonic"
+	"github.com/dizzrt/ellie/pkg/ptrconv"
 	"google.golang.org/genproto/googleapis/rpc/errdetails"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -17,9 +18,14 @@ const GRPC_STATUS_MAX_CODE = 17
 
 const _STANDARD_ERROR_TYPE = "standard_error"
 
+type marshalableStandardError struct {
+	Cause error      `json:"cause,omitempty"`
+	Core  *ErrorCore `json:"core,omitzero"`
+}
+
 type StandardError struct {
 	cause error
-	core  ErrorCore
+	core  *ErrorCore
 }
 
 func NewStandardError(status *codes.Code, code int, reason, message string) *StandardError {
@@ -30,7 +36,7 @@ func NewStandardError(status *codes.Code, code int, reason, message string) *Sta
 	}
 
 	return &StandardError{
-		core: ErrorCore{
+		core: &ErrorCore{
 			Status:  statusPtr,
 			Code:    int32(code),
 			Reason:  reason,
@@ -177,7 +183,12 @@ func (se *StandardError) Wrap(err error) error {
 }
 
 func (se *StandardError) Marshal() ([]byte, error) {
-	return json.Marshal(se)
+	temp := marshalableStandardError{
+		Cause: se.cause,
+		Core:  se.core,
+	}
+
+	return sonic.Marshal(temp)
 }
 
 func (se *StandardError) MapError() map[string]any {
@@ -217,7 +228,7 @@ func (se *StandardError) MapError() map[string]any {
 func (se *StandardError) Error() string {
 	emap := se.MapError()
 
-	errBytes, err := json.Marshal(emap)
+	errBytes, err := sonic.Marshal(emap)
 	if err != nil {
 		// fallback to simple format if JSON marshaling fails
 		msg := fmt.Sprintf("[%d][%s]", se.Code(), se.Reason())
@@ -241,11 +252,11 @@ func (se *StandardError) Clone() *StandardError {
 	maps.Copy(metadata, seMetadata)
 
 	return &StandardError{
-		core: ErrorCore{
-			Status:   se.core.Status,
-			Code:     se.core.Code,
-			Reason:   se.core.Reason,
-			Message:  se.core.Message,
+		core: &ErrorCore{
+			Status:   ptrconv.Ptr(se.core.GetStatus()),
+			Code:     se.core.GetCode(),
+			Reason:   se.core.GetReason(),
+			Message:  se.core.GetMessage(),
 			Metadata: metadata,
 		},
 		cause: se.cause,
@@ -253,10 +264,13 @@ func (se *StandardError) Clone() *StandardError {
 }
 
 func standardErrorChainableUnmarshal(_ string, data []byte) error {
-	se := &StandardError{}
-	if err := json.Unmarshal(data, &se); err != nil {
+	temp := marshalableStandardError{}
+	if err := sonic.Unmarshal(data, &temp); err != nil {
 		return fmt.Errorf("failed to unmarshal standard error with data: %s, error: %w", string(data), err)
 	}
 
-	return se
+	return &StandardError{
+		cause: temp.Cause,
+		core:  temp.Core,
+	}
 }
