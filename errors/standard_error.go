@@ -18,11 +18,6 @@ const GRPC_STATUS_MAX_CODE = 17
 
 const _STANDARD_ERROR_TYPE = "standard_error"
 
-type marshalableStandardError struct {
-	Cause error      `json:"cause,omitempty"`
-	Core  *ErrorCore `json:"core,omitzero"`
-}
-
 type StandardError struct {
 	cause error
 	core  *ErrorCore
@@ -183,12 +178,7 @@ func (se *StandardError) Wrap(err error) error {
 }
 
 func (se *StandardError) Marshal() ([]byte, error) {
-	temp := marshalableStandardError{
-		Cause: se.cause,
-		Core:  se.core,
-	}
-
-	return sonic.Marshal(temp)
+	return sonic.Marshal(se.core)
 }
 
 func (se *StandardError) MapError() map[string]any {
@@ -264,13 +254,13 @@ func (se *StandardError) Clone() *StandardError {
 }
 
 func standardErrorChainableUnmarshal(_ string, data []byte) error {
-	temp := marshalableStandardError{}
-	if err := sonic.Unmarshal(data, &temp); err != nil {
+	core := &ErrorCore{}
+	if err := sonic.Unmarshal(data, core); err != nil {
 		return fmt.Errorf("failed to unmarshal standard error with data: %s, error: %w", string(data), err)
 	}
 
 	return &StandardError{
-		cause: temp.Cause,
-		core:  temp.Core,
+		cause: nil,
+		core:  core,
 	}
 }

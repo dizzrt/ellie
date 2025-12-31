@@ -156,7 +156,7 @@ func recursiveUnpack(node *ErrorChainNode) error {
 		if ce, ok := err.(Chainable); ok {
 			err = ce.Wrap(wrappedErr)
 		} else {
-			err = fmt.Errorf("%w", wrappedErr)
+			err = fmt.Errorf("%w; [cause] %w", err, wrappedErr)
 		}
 	}
 
